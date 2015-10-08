@@ -1,0 +1,21 @@
+{
+  "name": "report_generator",
+  "version": "0.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "elasticsearch": "~8.2.0",
+    "firebase": "~2.3.1",
+    "q": "~1.4.1",
+    "underscore": "~1.8.3",
+    "l": "0.0.1",
+    "moment": "~2.10.6",
+    "uuid": "~2.0.1"
+  }
+}
