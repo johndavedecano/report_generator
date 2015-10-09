@@ -3,8 +3,8 @@
  */
 module.exports = {
     firebase : {
-        endpoint : "https://swaychat-beta.firebaseio.com"
-        , secret : "Frjn43RcE9DXfEAjCQN6uHE0DPT5GvsjsKHAmYnP"
+        endpoint : ""
+        , secret : ""
     },
     elasticsearch : {
         endpoint : "localhost:9200"
