@@ -1,11 +1,10 @@
 var config = require('./../config.js');
-var search = require('./search.js');
 var Q      = require('q');
 var _ = require('underscore');
-var visitor = require('./contracts/visitor.js');
-var session = require('./contracts/session.js');
-var team = require('./contracts/team.js');
-var agent = require('./contracts/agent.js');
+var VisitorPersister = require('./contracts/VisitorPersister.js');
+var SessionPersister = require('./contracts/SessionPersister.js');
+var TeamPersister = require('./contracts/TeamPersister.js');
+var AgentPersister = require('./contracts/AgentPersister.js');
 /**
  * @param object socket
  * @param string sessionKey
@@ -15,7 +14,6 @@ var SessionManager = function(socket, sessionKey, organizationKey) {
 	this.client          = socket.getClient();
 	this.sessionKey      = sessionKey;
 	this.organizationKey = organizationKey;
-	this.search          = new search(config.elasticsearch);
 }
 
 SessionManager.prototype = {
@@ -23,39 +21,36 @@ SessionManager.prototype = {
 		this.constructAllData(session).then(function(data) {
 			var teams = session.teams || {};
 			var agents =  session.agents || {};
-			this.make_agents(agents, data);
+			//this.make_session(data);
+			//this.make_visitor(data);
+			//this.make_agents(agents, data);
 			this.make_teams(teams, data);
-			this.make_session(data);
-			this.make_visitor(data);
-		}.bind(this));
-	},
-	make_visitor : function(data) {
-		var client = this.search.getClient();
-		var visitor = new visitor(client, data);
-		return visitor.persist();
-	},
-	make_teams : function(teams, data) {
-		var client = this.search.getClient();
-		_.each(teams, function(t, id) {
-			data.team_name = t.name || '';
-			data.team_id   = id;
-			var team = new team(client, data);
-			return team.persist();
-		}.bind(this));
-	},
-	make_agents : function(agents, data) {
-		var client = this.search.getClient();
-		_.each(agents, function(a, id) {
-			data.agent_name = a.name || '';
-			data.agent_id   = id;
-			var agent = new agent(client, data);
-			return agent.persist();
 		}.bind(this));
 	},
 	make_session : function(data) {
-		var client = this.search.getClient();
-		var session = new session(client, data);
-		return session.persist();
+		var Session = new SessionPersister(data);
+		return Session.persist(this.organizationKey);
+	},
+	make_visitor : function(data) {
+		var Visitor = new VisitorPersister(data);
+		return  Visitor.persist(this.organizationKey);
+	},
+	make_teams : function(teams, data) {
+		_.each(teams, function(t, id) {
+			data.team_name = t.name || '';
+			data.team_id   = id;
+			console.log(t.name, ' ', id);
+			var Team = new TeamPersister(data);
+			return Team.persist(this.organizationKey);
+		}.bind(this));
+	},
+	make_agents : function(agents, data) {
+		_.each(agents, function(a, id) {
+			data.agent_name = a.name || '';
+			data.agent_id   = id;
+			var Agent = new AgentPersister(data);
+			return Agent.persist(this.organizationKey);
+		}.bind(this));
 	},
 	constructAllData : function(session) {
     	var deferred = Q.defer();
@@ -110,8 +105,26 @@ SessionManager.prototype = {
 			"email"           : meta.email || '',
 			"name"            : meta.name || meta.assigned,
 			"session_id"      : this.sessionKey,
-			"visitor_state"   : session.state,
+			"visitor_state"   : session.state || 0,
+			"handling_time"   : this.getHandlingTime(session),
+			"wait_time"       : this.getWaitTime(session)
 		}
+	},
+	getHandlingTime : function(session) {
+		var served_at = parseInt(session.served_at);
+		var ended_at  = parseInt(session.ended_at);
+		if (ended_at > 0) {
+			var total = Math.round((ended_at - served_at) / 1000);
+		}
+		return 0;
+	},
+	getWaitTime : function(session) {
+		var queued_at  = parseInt(session.queued_at);
+		var served_at  = parseInt(session.served_at);
+		if (served_at > 0) {
+			return Math.round((served_at - queued_at) / 1000);
+		} 
+		return 0;
 	}
 };
 

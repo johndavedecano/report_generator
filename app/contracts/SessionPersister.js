@@ -1,20 +1,24 @@
 var uuid = require('uuid');
 var _    = require('underscore');
-var session = function(client, data) {
+var config = require('./../../config.js');
+var search = require('./../search.js');
+
+var SessionPersister = function(data) {
     this.fillables = ["browser","city","country","created_at","handling_time","state","wait_time"];
-    this.client    = client;
     this.data      = data;
     this.type      = 'sessions';
+    this.client    = new search(config.elasticsearch);
 }
 
-session.prototype = {
+SessionPersister.prototype = {
 	persist : function(index) {
-		this.client.insert({
+		var params = {
 			  index : index
 			, type  : this.type
 			, id    : this.data.session_id
 			, body  : this.getData()
-		})
+		};
+		this.client.insert(params);
 	},
 	getData : function()  {
 		var data = {};
@@ -25,4 +29,4 @@ session.prototype = {
 	}
 };
 
-module.export = session;
+module.exports = SessionPersister;

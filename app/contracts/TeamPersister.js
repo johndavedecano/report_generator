@@ -1,20 +1,25 @@
 var uuid = require('uuid');
 var _    = require('underscore');
-var team = function(client, data) {
+var config = require('./../../config.js');
+var search = require('./../search.js');
+
+var TeamPersister = function(data) {
     this.fillables = ["browser","city","country","created_at","handling_time","session_id","state","team_id","team_name","wait_time"];
-    this.client    = client;
+    this.client    = new search(config.elasticsearch);
     this.data      = data;
     this.type      = 'teams';
 }
 
-team.prototype = {
+TeamPersister.prototype = {
 	persist : function(index) {
 		this.client.insert({
 			  index : index
 			, type  : this.type
 			, id    : uuid.v1()
 			, body  : this.getData()
-		})
+		}, function(error, response) {
+
+		});
 	},
 	getData : function()  {
 		var data = {};
@@ -25,4 +30,4 @@ team.prototype = {
 	}
 };
 
-module.export = team;
+module.exports = TeamPersister;

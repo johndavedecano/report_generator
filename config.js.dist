@@ -1,0 +1,12 @@
+/**
+ * Created by jdecano on 10/7/15.
+ */
+module.exports = {
+    firebase : {
+        endpoint : "https://swaychat-beta.firebaseio.com"
+        , secret : "Frjn43RcE9DXfEAjCQN6uHE0DPT5GvsjsKHAmYnP"
+    },
+    elasticsearch : {
+        endpoint : "localhost:9200"
+    }
+}
