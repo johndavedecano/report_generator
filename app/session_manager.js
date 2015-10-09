@@ -21,9 +21,9 @@ SessionManager.prototype = {
 		this.constructAllData(session).then(function(data) {
 			var teams = session.teams || {};
 			var agents =  session.agents || {};
-			//this.make_session(data);
-			//this.make_visitor(data);
-			//this.make_agents(agents, data);
+			this.make_session(data);
+			this.make_visitor(data);
+			this.make_agents(agents, data);
 			this.make_teams(teams, data);
 		}.bind(this));
 	},
