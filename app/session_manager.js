@@ -2,6 +2,10 @@ var config = require('./../config.js');
 var search = require('./search.js');
 var Q      = require('q');
 var _ = require('underscore');
+var visitor = require('./contracts/visitor.js');
+var session = require('./contracts/session.js');
+var team = require('./contracts/team.js');
+var agent = require('./contracts/agent.js');
 /**
  * @param object socket
  * @param string sessionKey
@@ -17,8 +21,41 @@ var SessionManager = function(socket, sessionKey, organizationKey) {
 SessionManager.prototype = {
 	perform : function(session) {
 		this.constructAllData(session).then(function(data) {
-			console.log(data);
+			var teams = session.teams || {};
+			var agents =  session.agents || {};
+			this.make_agents(agents, data);
+			this.make_teams(teams, data);
+			this.make_session(data);
+			this.make_visitor(data);
 		}.bind(this));
+	},
+	make_visitor : function(data) {
+		var client = this.search.getClient();
+		var visitor = new visitor(client, data);
+		return visitor.persist();
+	},
+	make_teams : function(teams, data) {
+		var client = this.search.getClient();
+		_.each(teams, function(t, id) {
+			data.team_name = t.name || '';
+			data.team_id   = id;
+			var team = new team(client, data);
+			return team.persist();
+		}.bind(this));
+	},
+	make_agents : function(agents, data) {
+		var client = this.search.getClient();
+		_.each(agents, function(a, id) {
+			data.agent_name = a.name || '';
+			data.agent_id   = id;
+			var agent = new agent(client, data);
+			return agent.persist();
+		}.bind(this));
+	},
+	make_session : function(data) {
+		var client = this.search.getClient();
+		var session = new session(client, data);
+		return session.persist();
 	},
 	constructAllData : function(session) {
     	var deferred = Q.defer();
@@ -51,29 +88,29 @@ SessionManager.prototype = {
 		ua.device = ua.device || '';
 
 		return {
-			"visitor_id" : visitor.visitor_id,
-			"visitor_name" : meta.name || meta.assigned,
-			"initial" : name.charAt(0),
-			"avatar" : meta.avatar || '',
-			"phone" : meta.phone || '',
-			"rating" : session.rating || 0,
-			"last_message" : last_message.message || '',
+			"visitor_id"      : visitor.visitor_id,
+			"visitor_name"    : meta.name || meta.assigned,
+			"initial"         : name.charAt(0),
+			"avatar"          : meta.avatar || '',
+			"phone"           : meta.phone || '',
+			"rating"          : session.rating || 0,
+			"last_message"    : last_message.message || '',
 			"last_message_at" : last_message.updated_at || '',
-			"longitude" : geoip.longitude || '',
-			"latitude" : geoip.latitude || '',
-			"zipcode" : geoip.zipcode || '',
-			"os" : ua.os.name || '',
-			"device" : ua.device,
-			"engine" : ua.engine.name || '',
-			"browser" : ua.browser.name || '',
-			"city" : geoip.city || '',
-			"state" : geoip.state || '',
-			"country" : geoip.country || '',
-			"created_at" : session.created_at,
-			"email" : meta.email || '',
-			"name" : meta.name || meta.assigned,
-			"session_id" : this.sessionKey,
-			"visitor_state" : session.state,
+			"longitude"       : geoip.longitude || '',
+			"latitude"        : geoip.latitude || '',
+			"zipcode"         : geoip.zipcode || '',
+			"os"              : ua.os.name || '',
+			"device"          : ua.device,
+			"engine"          : ua.engine.name || '',
+			"browser"         : ua.browser.name || '',
+			"city"            : geoip.city || '',
+			"state"           : geoip.state || '',
+			"country"         : geoip.country || '',
+			"created_at"      : session.created_at,
+			"email"           : meta.email || '',
+			"name"            : meta.name || meta.assigned,
+			"session_id"      : this.sessionKey,
+			"visitor_state"   : session.state,
 		}
 	}
 };
