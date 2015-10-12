@@ -6,7 +6,7 @@ var socket = function(config) {
     this.config = config;
     this.fb = new Firebase(config.endpoint);
     this.fb.authWithCustomToken(config.secret, function(payload) {
-        console.log(payload || "Firebase is okay............");
+        console.log(payload || "Successfully logged in to firebase server...");
     });
 }
 
