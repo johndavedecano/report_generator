@@ -1,4 +1,4 @@
-# report_generator
+# Report Generator
 
 1. ```mkdir /var/www/generator && cd /var/www/generator```
 2. ```git init```
