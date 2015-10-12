@@ -9,5 +9,5 @@
 
 # Running cron job everyday
 
-1. ```sudo crontab-e```
+1. ```sudo crontab -e```
 2. ```@daily node /var/www/generator/main.js```
