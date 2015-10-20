@@ -54,7 +54,7 @@ SessionManager.prototype = {
 	},
 	constructAllData : function(session) {
     	var deferred = Q.defer();
-		this.getVisitorData(session.visitor).then(function(visitor) {
+		this.getVisitorData(session.visitor_id).then(function(visitor) {
 			deferred.resolve(this.createESContract(session, visitor));
 		}.bind(this));
 		return deferred.promise;
