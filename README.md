@@ -2,7 +2,7 @@
 
 1. ```mkdir /var/www/generator && cd /var/www/generator```
 2. ```git init```
-3. ```git remote add origin clone git@github.com:johndavedecano/report_generator.git```
+3. ```git remote add origin https://github.com/johndavedecano/report_generator.git```
 4. ```git pull origin master```
 5. ```npm install```
 
