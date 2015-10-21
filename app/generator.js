@@ -27,8 +27,8 @@ generator.prototype = {
 		client.child(organizationId)
 			.child('sessions')
 			.orderByChild("created_at")
-			.startAt(range.startAt)
-			.endAt(range.endAt)
+			//.startAt(range.startAt)
+			//.endAt(range.endAt)
 			.once("value", function(snapshot) {
 				snapshot.forEach(function(session) {
 			  		var sessionManager = new SessionManager(this.socket, session.key(), organizationId);

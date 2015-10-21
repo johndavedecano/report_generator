@@ -36,12 +36,13 @@ SessionManager.prototype = {
 		return  Visitor.persist(this.organizationKey);
 	},
 	make_teams : function(teams, data) {
-		_.each(teams, function(t, id) {
-			data.team_name = t.name || '';
-			data.team_id   = id;
-			console.log(t.name, ' ', id);
-			var Team = new TeamPersister(data);
-			return Team.persist(this.organizationKey);
+		_.each(teams, function(id, key) {
+			this.getTeamData(id).then(function(t) {
+				data.team_name = t.name || '';
+				data.team_id   = id;
+				var Team = new TeamPersister(data);
+				return Team.persist(this.organizationKey);
+			}.bind(this));
 		}.bind(this));
 	},
 	make_agents : function(agents, data) {
@@ -58,6 +59,17 @@ SessionManager.prototype = {
 			deferred.resolve(this.createESContract(session, visitor));
 		}.bind(this));
 		return deferred.promise;
+	},
+	getTeamData : function(team_id) {
+    	var deferred = Q.defer();
+    	this.client
+    		.child(this.organizationKey)
+    		.child('teams')
+    		.child(team_id)
+    		.once('value', function(snap) {
+    			deferred.resolve(_.extend(snap.val(), { team_id : team_id }));
+    		});
+    	return deferred.promise;
 	},
 	getVisitorData : function(visitor_id) {
     	var deferred = Q.defer();
