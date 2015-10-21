@@ -18,14 +18,18 @@ var SessionManager = function(socket, sessionKey, organizationKey) {
 
 SessionManager.prototype = {
 	perform : function(session) {
-		this.constructAllData(session).then(function(data) {
-			var teams = session.teams || {};
-			var agents =  session.agents || {};
-			this.make_session(data);
-			this.make_visitor(data);
-			this.make_agents(agents, data);
-			this.make_teams(teams, data);
-		}.bind(this));
+		if (session) {
+			this.constructAllData(session).then(function(data) {
+				if (session.visitor_id) {
+					var teams = session.teams || {};
+					var agents =  session.agents || {};
+					this.make_session(data);
+					this.make_visitor(data);
+					this.make_agents(agents, data);
+					this.make_teams(teams, data);
+				}
+			}.bind(this));
+		}
 	},
 	make_session : function(data) {
 		var Session = new SessionPersister(data);
