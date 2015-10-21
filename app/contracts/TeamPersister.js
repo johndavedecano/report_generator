@@ -18,7 +18,7 @@ TeamPersister.prototype = {
 			, id    : uuid.v1()
 			, body  : this.getData()
 		}, function(error, response) {
-
+			console.log(error);
 		});
 	},
 	getData : function()  {

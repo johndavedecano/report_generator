@@ -18,15 +18,14 @@ var SessionManager = function(socket, sessionKey, organizationKey) {
 
 SessionManager.prototype = {
 	perform : function(session) {
+		console.log(session);
 		this.constructAllData(session).then(function(data) {
-			if (session.visitor_id) {
-				var teams = session.teams || {};
-				var agents =  session.agents || {};
-				this.make_session(data);
-				this.make_visitor(data);
-				this.make_agents(agents, data);
-				this.make_teams(teams, data);
-			}
+			var teams = session.teams || {};
+			var agents =  session.agents || {};
+			this.make_session(data);
+			this.make_visitor(data);
+			this.make_agents(agents, data);
+			this.make_teams(teams, data);
 		}.bind(this), function() {
 			console.log(session);
 		});
@@ -40,7 +39,7 @@ SessionManager.prototype = {
 		return  Visitor.persist(this.organizationKey);
 	},
 	make_teams : function(teams, data) {
-		_.each(teams, function(id, key) {
+		_.each(teams, function(id) {
 			this.getTeamData(id).then(function(t) {
 				data.team_name = t.name || '';
 				data.team_id   = id;
@@ -59,9 +58,8 @@ SessionManager.prototype = {
 	},
 	constructAllData : function(session) {
     	var deferred = Q.defer();
-    	if (!session.visitor_id) {
-    		deferred.reject();
-    	} else {
+    	session.visitor_id = session.visitor_id || session.visitor;
+    	if (session.visitor_id) {
 			this.getVisitorData(session.visitor_id).then(function(visitor) {
 				deferred.resolve(this.createESContract(session, visitor));
 			}.bind(this));
