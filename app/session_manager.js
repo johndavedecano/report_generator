@@ -63,6 +63,8 @@ SessionManager.prototype = {
 			this.getVisitorData(session.visitor_id).then(function(visitor) {
 				deferred.resolve(this.createESContract(session, visitor));
 			}.bind(this));
+    	} else {
+    		deferred.reject({});
     	}
 		return deferred.promise;
 	},
