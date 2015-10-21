@@ -18,18 +18,18 @@ var SessionManager = function(socket, sessionKey, organizationKey) {
 
 SessionManager.prototype = {
 	perform : function(session) {
-		if (session) {
-			this.constructAllData(session).then(function(data) {
-				if (session.visitor_id) {
-					var teams = session.teams || {};
-					var agents =  session.agents || {};
-					this.make_session(data);
-					this.make_visitor(data);
-					this.make_agents(agents, data);
-					this.make_teams(teams, data);
-				}
-			}.bind(this));
-		}
+		this.constructAllData(session).then(function(data) {
+			if (session.visitor_id) {
+				var teams = session.teams || {};
+				var agents =  session.agents || {};
+				this.make_session(data);
+				this.make_visitor(data);
+				this.make_agents(agents, data);
+				this.make_teams(teams, data);
+			}
+		}.bind(this), function() {
+			console.log(session);
+		});
 	},
 	make_session : function(data) {
 		var Session = new SessionPersister(data);
@@ -59,9 +59,13 @@ SessionManager.prototype = {
 	},
 	constructAllData : function(session) {
     	var deferred = Q.defer();
-		this.getVisitorData(session.visitor_id).then(function(visitor) {
-			deferred.resolve(this.createESContract(session, visitor));
-		}.bind(this));
+    	if (!session.visitor_id) {
+    		deferred.reject();
+    	} else {
+			this.getVisitorData(session.visitor_id).then(function(visitor) {
+				deferred.resolve(this.createESContract(session, visitor));
+			}.bind(this));
+    	}
 		return deferred.promise;
 	},
 	getTeamData : function(team_id) {
